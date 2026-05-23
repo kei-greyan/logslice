@@ -32,9 +32,17 @@ func TestParse_Valid(t *testing.T) {
 }
 
 func TestParse_Invalid(t *testing.T) {
-	_, err := filter.Parse("noop")
-	if err == nil {
-		t.Fatal("expected error for invalid expression")
+	invalidCases := []string{
+		"noop",
+		"",
+		"=value",
+		"field=",
+	}
+	for _, input := range invalidCases {
+		_, err := filter.Parse(input)
+		if err == nil {
+			t.Errorf("Parse(%q): expected error, got nil", input)
+		}
 	}
 }
 
