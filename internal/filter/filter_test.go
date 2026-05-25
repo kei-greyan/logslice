@@ -48,9 +48,9 @@ func TestParse_Invalid(t *testing.T) {
 
 func TestMatch(t *testing.T) {
 	cases := []struct {
-		expr  string
-		line  string
-		want  bool
+		expr string
+		line string
+		want bool
 	}{
 		{"level=error", `{"level":"error","msg":"oops"}`, true},
 		{"level=error", `{"level":"info","msg":"ok"}`, false},
@@ -70,6 +70,24 @@ func TestMatch(t *testing.T) {
 		}
 		if got != tc.want {
 			t.Errorf("expr=%q line=%q: got %v, want %v", tc.expr, tc.line, got, tc.want)
+		}
+	}
+}
+
+func TestMatch_InvalidJSON(t *testing.T) {
+	expr, err := filter.Parse("level=error")
+	if err != nil {
+		t.Fatalf("Parse: unexpected error: %v", err)
+	}
+	invalidLines := []string{
+		"not json at all",
+		`{"level":"error"`, // unterminated
+		"",
+	}
+	for _, line := range invalidLines {
+		_, err := expr.Match([]byte(line))
+		if err == nil {
+			t.Errorf("Match(%q): expected error for invalid JSON, got nil", line)
 		}
 	}
 }
